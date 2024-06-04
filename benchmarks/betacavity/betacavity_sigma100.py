@@ -12,9 +12,9 @@ from wakeSolver import WakeSolver
 
 # ---------- Domain setup ---------
 # Number of mesh cells
-Nx = 79
-Ny = 79
-Nz = 157
+Nx = 55
+Ny = 55
+Nz = 108
 #dt = 5.707829241e-12 # CST
 
 # Embedded boundaries
@@ -24,7 +24,7 @@ stl_pipe = 'beampipe.stl'
 # Materials
 stl_solids = {'cavity': stl_cavity, 'pipe': stl_pipe}
 stl_materials = {'cavity': 'vacuum', 'pipe':  'vacuum'}
-background = [1000, 1.0, 1000] # lossy metal [ε_r, µ_r, σ]
+background = [100, 1.0, 100] # lossy metal [ε_r, µ_r, σ]
 
 # Domain bounds
 surf = pv.read(stl_cavity) + pv.read(stl_pipe)
@@ -39,7 +39,7 @@ grid = GridFIT3D(xmin, xmax, ymin, ymax, zmin, zmax, Nx, Ny, Nz,
 
 # ------------ Beam source ----------------
 # Beam parameters
-beta = 1          # beam relativistic beta 
+beta = 0.8          # beam relativistic beta 
 sigmaz = beta*6e-2  # [m] -> multiplied by beta to have f_max cte
 q = 1e-9            # [C]
 xs = 0.             # x source position [m]
@@ -49,12 +49,12 @@ yt = 0.             # y test position [m]
 # [DEFAULT] tinj = 8.53*sigmaz/(beta*c)  # injection time offset [s] 
 
 # Simulation
-wakelength = 100. #[m]
+wakelength = 30. #[m]
 add_space = 5   # no. cells
 
 wake = WakeSolver(q=q, sigmaz=sigmaz, beta=beta,
             xsource=xs, ysource=ys, xtest=xt, ytest=yt,
-            add_space=add_space, save=True, logfile=True, results_folder='results_beta1_sigma1e3_wl100/')
+            add_space=add_space, save=True, logfile=True, results_folder='results_beta08_sigma100_wl30/')
 
 # ----------- Solver & Simulation ----------
 # boundary conditions``
@@ -101,7 +101,7 @@ wake.f = np.abs(wake.f)
 fig, ax = plt.subplots(1,2, figsize=[12,4], dpi=150)
 ax[0].plot(wake.s*1e2, wake.WP, c='r', lw=1.5) # , label='FIT+Wakis'
 #ax[0].plot(cstWP[0], cstWP[1], c='k', ls='--', lw=1.5, label='CST')
-ax[0].set_xlabel('s [mm]')
+ax[0].set_xlabel('s [cm]')
 ax[0].set_ylabel('Longitudinal wake potential [V/pC]', color='r')
 ax[0].legend()
 
@@ -113,6 +113,6 @@ ax[1].legend()
 
 #fig.suptitle('Benchmark with CST Wakefield Solver')
 fig.tight_layout()
-fig.savefig('results_beta1_sigma1e3_wl100/results.png')
+fig.savefig('results_beta08_sigma100_wl30/wake_and_impedance.png')
 
 plt.show()
