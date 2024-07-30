@@ -14,7 +14,7 @@ from wakeSolver import WakeSolver
 # Number of mesh cells
 Nx = 55
 Ny = 55
-Nz = 108
+Nz = int(108*1.2)
 #dt = 5.707829241e-12 # CST
 
 # Embedded boundaries
@@ -25,17 +25,18 @@ stl_pipe = 'beampipe.stl'
 stl_solids = {'cavity': stl_cavity, 'pipe': stl_pipe}
 stl_materials = {'cavity': 'vacuum', 'pipe':  'vacuum'}
 background = [100, 1.0, 100] # lossy metal [ε_r, µ_r, σ]
-
+stl_scale =  {'cavity': [1.0, 1.0, 1.0], 'pipe': [1., 1., 1.2]}
 
 # Domain bounds
-surf = pv.read(stl_cavity) + pv.read(stl_pipe)
+surf = pv.read(stl_cavity) + pv.read(stl_pipe).scale(stl_scale['pipe'])
 xmin, xmax, ymin, ymax, zmin, zmax = surf.bounds
 Lx, Ly, Lz = (xmax-xmin), (ymax-ymin), (zmax-zmin)
 
 # Set grid and geometry
 grid = GridFIT3D(xmin, xmax, ymin, ymax, zmin, zmax, Nx, Ny, Nz, 
                 stl_solids=stl_solids, 
-                stl_materials=stl_materials)
+                stl_materials=stl_materials,
+                stl_scale=stl_scale)
 #grid.inspect()
 
 # ------------ Beam source ----------------
@@ -51,7 +52,7 @@ yt = 0.             # y test position [m]
 
 # Simulation
 wakelength = 21. #[m]
-add_space = 5   # no. cells
+add_space = 15   # no. cells
 results_folder = 'results_beta05_sigma100_wl21_longerpipe/'
 
 wake = WakeSolver(q=q, sigmaz=sigmaz, beta=beta,

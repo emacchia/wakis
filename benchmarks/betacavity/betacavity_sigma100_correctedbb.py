@@ -12,8 +12,8 @@ from wakeSolver import WakeSolver
 
 # ---------- Domain setup ---------
 # Number of mesh cells
-Nx = 55
-Ny = 55
+Nx = 67 # because I increased the dimensions of the bounding box
+Ny = 67 # because I increased the dimensions of the bounding box
 Nz = 108
 #dt = 5.707829241e-12 # CST
 
@@ -26,10 +26,13 @@ stl_solids = {'cavity': stl_cavity, 'pipe': stl_pipe}
 stl_materials = {'cavity': 'vacuum', 'pipe':  'vacuum'}
 background = [100, 1.0, 100] # lossy metal [ε_r, µ_r, σ]
 
-
 # Domain bounds
 surf = pv.read(stl_cavity) + pv.read(stl_pipe)
 xmin, xmax, ymin, ymax, zmin, zmax = surf.bounds
+xmin=xmin-2e-3 # because I increased the dimensions of the bounding box
+xmax=xmin+2e-3 # because I increased the dimensions of the bounding box
+ymin=ymin-2e-3 # because I increased the dimensions of the bounding box
+ymax=ymin+2e-3 # because I increased the dimensions of the bounding box
 Lx, Ly, Lz = (xmax-xmin), (ymax-ymin), (zmax-zmin)
 
 # Set grid and geometry
@@ -52,11 +55,10 @@ yt = 0.             # y test position [m]
 # Simulation
 wakelength = 21. #[m]
 add_space = 5   # no. cells
-results_folder = 'results_beta05_sigma100_wl21_longerpipe/'
 
 wake = WakeSolver(q=q, sigmaz=sigmaz, beta=beta,
             xsource=xs, ysource=ys, xtest=xt, ytest=yt,
-            add_space=add_space, save=True, logfile=True, results_folder=results_folder)
+            add_space=add_space, save=True, logfile=True, results_folder='results_beta05_sigma100_wl21/')
 
 # ----------- Solver & Simulation ----------
 # boundary conditions``
@@ -115,6 +117,6 @@ ax[1].legend()
 
 #fig.suptitle('Benchmark with CST Wakefield Solver')
 fig.tight_layout()
-fig.savefig(results_folder+'wake_and_impedance.png')
+fig.savefig('results_beta05_sigma100_wl21/wake_and_impedance.png')
 
 plt.show()

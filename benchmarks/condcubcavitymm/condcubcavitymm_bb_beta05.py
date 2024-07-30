@@ -36,7 +36,7 @@ grid = GridFIT3D(xmin, xmax, ymin, ymax, zmin, zmax, Nx, Ny, Nz,
     
 # ------------ Beam source ----------------
 # Beam parameters
-beta = 1.0          # beam beta TODO
+beta = 0.5          # beam beta TODO
 sigmaz = beta*18.5e-3    #[m] -> 5.53 GHz
 q = 1e-9            #[C]
 xs = 0.             # x source position [m]
@@ -49,22 +49,24 @@ yt = 0.             # y test position [m]
 wakelength = 1. #[m]
 add_space = 8   # no. cells
 
+results_folder='results_beta05_bb_allpec/'
+
 wake = WakeSolver(q=q, sigmaz=sigmaz, beta=beta,
             xsource=xs, ysource=ys, xtest=xt, ytest=yt,
-            add_space=add_space, save=True, logfile=True, results_folder='results_beta1/')
+            add_space=add_space, save=True, logfile=True, results_folder=results_folder)
 
 # ----------- Solver & Simulation ----------
 # boundary conditions``
-bc_low=['pec', 'pec', 'abc']
-bc_high=['pec', 'pec', 'abc']
+bc_low=['pec', 'pec', 'pec']
+bc_high=['pec', 'pec', 'pec']
 
 solver = SolverFIT3D(grid, wake, dt=dt,
                      bc_low=bc_low, bc_high=bc_high, 
-                     use_stl=True, bg='pec')
+                     use_stl=False, bg='vacuum')
 # Plot settings
 if not os.path.exists('img/'): os.mkdir('img/')
 plotkw = {'title':'img/Ez', 
-            'add_patch':'cavity', 'patch_alpha':0.3,
+            # 'add_patch':'cavity', 'patch_alpha':0.3,
             'vmin':-1e4, 'vmax':1e4,
             'plane': [int(Nx/2), slice(0, Ny), slice(0+add_space, Nz-add_space)]}
 
@@ -97,8 +99,8 @@ if run is False and runEM is False:
 plot = True
 if plot:
     # # CST wake
-    cstWP = wake.read_txt('results_beta1/CSTwake.txt')
-    cstZ = wake.read_txt('results_beta1/CSTZ.txt')
+    # cstWP = wake.read_txt('results_beta1/CSTwake.txt')
+    # cstZ = wake.read_txt('results_beta1/CSTZ.txt')
 
     # #Recompute DFT with same max freq as cst (optional)
     # wake.f = np.abs(wake.f)
@@ -106,20 +108,20 @@ if plot:
 
     fig, ax = plt.subplots(1,2, figsize=[12,4], dpi=150)
     ax[0].plot(wake.s*1e3, wake.WP, c='r', lw=1.5, label='FIT+Wakis')
-    ax[0].plot(cstWP[0], cstWP[1], c='k', ls='--', lw=1.5, label='CST')
-    ax[0].set_xlabel('s [mm]')
-    ax[0].set_ylabel('Longitudinal wake potential [V/pC]', color='r')
+    # ax[0].plot(cstWP[0], cstWP[1], c='k', ls='--', lw=1.5, label='CST')
+    ax[0].set_xlabel(r's [mm]')
+    ax[0].set_ylabel(r'Longitudinal wake potential [V/pC]', color='r')
     ax[0].legend()
 
     ax[1].plot(wake.f*1e-9, np.abs(wake.Z), c='b', lw=1.5, label='FIT+Wakis')
-    ax[1].plot(cstZ[0], cstZ[1], c='k', ls='--', lw=1.5, label='CST')
-    ax[1].set_xlabel('f [GHz]')
-    ax[1].set_ylabel('Longitudinal impedance [Abs][$\Omega$]', color='b')
+    # ax[1].plot(cstZ[0], cstZ[1], c='k', ls='--', lw=1.5, label='CST')
+    ax[1].set_xlabel(r'f [GHz]')
+    ax[1].set_ylabel(r'Longitudinal impedance [Abs][$\Omega$]', color='b')
     ax[1].legend()
 
     fig.suptitle('Benchmark with CST Wakefield Solver')
     fig.tight_layout()
-    fig.savefig('results_beta1/wake_and_impedance.png')
+    fig.savefig(results_folder+'wake_and_impedance.png')
 
     plt.show()
 
@@ -142,8 +144,8 @@ if plot:
 
         ax.plot(z, d[step][1,1,:], c='g', lw=1.5, label='Ez(0,0,z) FIT | $\sigma$ = 5 S/m')
         ax.plot(z, dd[step][1,1,:], c='grey', lw=1.5, label='Ez(0,0,z) FIT | PEC')
-        ax.set_xlabel('z [m]')
-        ax.set_ylabel('$E_z$ field amplitude [V/m]', color='g')
+        ax.set_xlabel(r'z [m]')
+        ax.set_ylabel(r'$E_z$ field amplitude [V/m]', color='g')
         ax.set_ylim(-3e3, 3e3)
         ax.set_xlim(z.min(), z.max())
         

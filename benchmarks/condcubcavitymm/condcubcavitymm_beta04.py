@@ -36,7 +36,7 @@ grid = GridFIT3D(xmin, xmax, ymin, ymax, zmin, zmax, Nx, Ny, Nz,
     
 # ------------ Beam source ----------------
 # Beam parameters
-beta = 1.0          # beam beta TODO
+beta = 0.4          # beam beta TODO
 sigmaz = beta*18.5e-3    #[m] -> 5.53 GHz
 q = 1e-9            #[C]
 xs = 0.             # x source position [m]
@@ -49,9 +49,11 @@ yt = 0.             # y test position [m]
 wakelength = 1. #[m]
 add_space = 8   # no. cells
 
+results_folder='results_beta04/'
+
 wake = WakeSolver(q=q, sigmaz=sigmaz, beta=beta,
             xsource=xs, ysource=ys, xtest=xt, ytest=yt,
-            add_space=add_space, save=True, logfile=True, results_folder='results_beta1/')
+            add_space=add_space, save=True, logfile=True, results_folder=results_folder)
 
 # ----------- Solver & Simulation ----------
 # boundary conditions``
@@ -97,8 +99,8 @@ if run is False and runEM is False:
 plot = True
 if plot:
     # # CST wake
-    cstWP = wake.read_txt('results_beta1/CSTwake.txt')
-    cstZ = wake.read_txt('results_beta1/CSTZ.txt')
+    # cstWP = wake.read_txt('results_beta1/CSTwake.txt')
+    # cstZ = wake.read_txt('results_beta1/CSTZ.txt')
 
     # #Recompute DFT with same max freq as cst (optional)
     # wake.f = np.abs(wake.f)
@@ -106,20 +108,20 @@ if plot:
 
     fig, ax = plt.subplots(1,2, figsize=[12,4], dpi=150)
     ax[0].plot(wake.s*1e3, wake.WP, c='r', lw=1.5, label='FIT+Wakis')
-    ax[0].plot(cstWP[0], cstWP[1], c='k', ls='--', lw=1.5, label='CST')
+    # ax[0].plot(cstWP[0], cstWP[1], c='k', ls='--', lw=1.5, label='CST')
     ax[0].set_xlabel('s [mm]')
     ax[0].set_ylabel('Longitudinal wake potential [V/pC]', color='r')
     ax[0].legend()
 
     ax[1].plot(wake.f*1e-9, np.abs(wake.Z), c='b', lw=1.5, label='FIT+Wakis')
-    ax[1].plot(cstZ[0], cstZ[1], c='k', ls='--', lw=1.5, label='CST')
+    # ax[1].plot(cstZ[0], cstZ[1], c='k', ls='--', lw=1.5, label='CST')
     ax[1].set_xlabel('f [GHz]')
-    ax[1].set_ylabel('Longitudinal impedance [Abs][$\Omega$]', color='b')
+    ax[1].set_ylabel(r'Longitudinal impedance [Abs][$\Omega$]', color='b')
     ax[1].legend()
 
     fig.suptitle('Benchmark with CST Wakefield Solver')
     fig.tight_layout()
-    fig.savefig('results_beta1/wake_and_impedance.png')
+    fig.savefig(results_folder+'wake_and_impedance.png')
 
     plt.show()
 
